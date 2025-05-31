@@ -29,6 +29,10 @@ This project is a Mac local OCR application based on [**Pix2Text**](https://gith
 
 > Note ⚠️: This application is only available for MacOS.
 
+## Keyboard Shortcuts
+
+- **Ctrl+Alt+M**: Capture screenshot and perform formula recognition (OCR)
+
 The initial code of this project was forked from: [horennel/LaTex-OCR_for_macOS](https://github.com/horennel/LaTex-OCR_for_macOS). Special thanks to the author of this project.
 
 ## Features
