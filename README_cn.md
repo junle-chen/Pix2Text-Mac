@@ -29,6 +29,11 @@
 
 > 注意 ⚠️：该应用程序仅适用于 MacOS 。
 
+## 键盘快捷键
+
+- **Cmd+Shift+Z**: 截图并进行公式识别 (OCR)，输出为块级公式（使用 `$$` 包裹）
+- **Cmd+B**: 截图并进行公式识别 (OCR)，输出为内联公式（使用 `$` 包裹）
+
 本项目初始代码 Fork 自：[horennel/LaTex-OCR_for_macOS](https://github.com/horennel/LaTex-OCR_for_macOS)，感谢此项目作者。
 
 

@@ -18,8 +18,9 @@ from pynput import keyboard
 
 # 延迟导入 Pix2Text，降低启动内存占用
 # 配置日志记录
-logging.basicConfig(level=logging.INFO, 
-                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 SUCCESS_NT_FORM = {
     "title": "Success!",
@@ -53,12 +54,13 @@ class Pix2TextApplication(rumps.App):
         # 设置热键监听器
         self.hotkey_listener = None
         self.start_keyboard_listener()
-        
+
     def _get_p2t(self):
         """懒加载 Pix2Text 模型，只有在首次使用时才加载"""
         if self.p2t is None:
             # 导入时才载入 Pix2Text 库
             from pix2text import Pix2Text
+
             logging.info("正在加载 Pix2Text 模型...")
             self.p2t = Pix2Text.from_config(**CONFIG["pix2text"])
             logging.info("Pix2Text 模型加载完成")
@@ -160,7 +162,15 @@ class Pix2TextApplication(rumps.App):
             page_ocr_button.set_callback(None)
 
     def on_hotkey_pressed(self):
-        """当热键被按下时执行的操作"""
+        """当热键被按下时执行的操作 - 识别为块级公式 ($$)"""
+        self._capture_and_recognize_formula(block_formula=True)
+
+    def on_inline_formula_hotkey_pressed(self):
+        """当快捷键被按下时识别为内联公式 ($)"""
+        self._capture_and_recognize_formula(block_formula=False)
+
+    def _capture_and_recognize_formula(self, block_formula=True):
+        """截图并识别公式，可选择生成块级公式或内联公式"""
         # 创建临时文件用于保存截图
         temp_file = tempfile.mktemp(suffix=".png")
 
@@ -176,7 +186,15 @@ class Pix2TextApplication(rumps.App):
                 # 调用公式识别功能
                 try:
                     formula_str = self._get_p2t().recognize_formula(image)
-                    pyperclip.copy(f"$$\n{formula_str}\n$$")
+
+                    if block_formula:
+                        # 块级公式格式
+                        output_str = f"$$\n{formula_str}\n$$"
+                    else:
+                        # 内联公式格式
+                        output_str = f"${formula_str}$"
+
+                    pyperclip.copy(output_str)
                     SUCCESS_NT_FORM["message"] = formula_str
                     rumps.notification(**SUCCESS_NT_FORM)
                 except Exception as e:
@@ -198,9 +216,14 @@ class Pix2TextApplication(rumps.App):
 
     def start_keyboard_listener(self):
         """启动键盘监听器"""
-        # 创建一个组合键监听器，监听 cmd+shift+a
+        # 创建组合键监听器
+        # cmd+shift+z: 识别为块级公式 ($$)
+        # cmd+b: 识别为内联公式 ($)
         self.hotkey_listener = keyboard.GlobalHotKeys(
-            {"<cmd>+<shift>+a": self.on_hotkey_pressed}
+            {
+                "<cmd>+<shift>+z": self.on_hotkey_pressed,
+                "<cmd>+b": self.on_inline_formula_hotkey_pressed,
+            }
         )
         self.hotkey_listener.start()
 
